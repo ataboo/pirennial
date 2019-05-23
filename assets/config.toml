@@ -1,0 +1,19 @@
+[[pumps]]
+pin = 4
+flow = 2.0
+primeTime = 0.5
+
+[[pumps]]
+pin = 22
+flow = 2.0
+primeTime = 0.5
+
+# [[pumps]]
+# pin = 6
+# flow = 2.0
+# primeTime = 0.5
+# [[pumps]]
+# pin = 26
+# flow = 2.0
+# primeTime = 0.5
+
