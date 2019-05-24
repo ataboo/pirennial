@@ -2,28 +2,30 @@ package pumps
 
 import (
 	"time"
+
+	"github.com/ataboo/pirennial/services/clock"
 )
 
 // Sprinkle representation of a watering event performed by a pump
 type Sprinkle struct {
 	startTime time.Time
-	amount    float32
+	volume    float64
 }
 
 // SprinkleLog slice of Sprinkles
 type SprinkleLog []Sprinkle
 
 // SumWithinDurationAgo get the total sprinkle amounts within duration before now
-func (l SprinkleLog) SumWithinDurationAgo(duration time.Duration) float32 {
-	sum := float32(0)
-	cutoff := time.Now().Add(-duration)
+func (l SprinkleLog) SumWithinDurationAgo(duration time.Duration) float64 {
+	sum := float64(0)
+	cutoff := clock.Now().Add(-duration)
 
 	for _, s := range l {
 		if s.startTime.Before(cutoff) {
 			break
 		}
 
-		sum += s.amount
+		sum += s.volume
 	}
 
 	return sum
@@ -31,7 +33,7 @@ func (l SprinkleLog) SumWithinDurationAgo(duration time.Duration) float32 {
 
 // GCBeforeDurationAgo remove sprinkles more than `duration` before now
 func (l *SprinkleLog) GCBeforeDurationAgo(duration time.Duration) {
-	cutoff := time.Now().Add(-duration)
+	cutoff := clock.Now().Add(-duration)
 
 	for i := len(*l); i >= 0; i-- {
 		if (*l)[i].startTime.Before(cutoff) {
@@ -43,10 +45,10 @@ func (l *SprinkleLog) GCBeforeDurationAgo(duration time.Duration) {
 }
 
 // AddLog add a sprinkle amount to the log
-func (l *SprinkleLog) AddLog(amount float32) {
+func (l *SprinkleLog) AddLog(volume float64) {
 	s := Sprinkle{
-		startTime: time.Now(),
-		amount:    amount,
+		startTime: clock.Now(),
+		volume:    volume,
 	}
 
 	l.Push(s)

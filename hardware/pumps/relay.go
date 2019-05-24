@@ -20,8 +20,9 @@ func init() {
 
 // Relay representation of a relay driving a pump
 type Relay struct {
-	pin  *gpio.Pin
-	isOn bool
+	pin       *gpio.Pin
+	isOn      bool
+	pinNumber uint
 }
 
 // NewRelay create a new relay
@@ -33,11 +34,16 @@ func NewRelay(pinNumber uint) *Relay {
 	}
 
 	relay := Relay{
-		pin:  pin,
-		isOn: false,
+		pin:       pin,
+		isOn:      false,
+		pinNumber: pinNumber,
 	}
 
 	return &relay
+}
+
+func (r *Relay) PinNumber() uint {
+	return r.pinNumber
 }
 
 // On turn the relay on

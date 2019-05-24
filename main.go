@@ -1,7 +1,8 @@
 package main
 
 import (
-	"github.com/ataboo/pirennial/config"
+	"github.com/ataboo/pirennial/hardware/pumps"
+	"github.com/ataboo/pirennial/services/config"
 	"github.com/op/go-logging"
 )
 
@@ -12,6 +13,6 @@ func init() {
 }
 
 func main() {
-	cfg := config.Cfg()
+	ps := pumps.CreatePumpControl(*config.Cfg())
 
 }

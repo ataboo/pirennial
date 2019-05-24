@@ -40,7 +40,7 @@ type Config struct {
 }
 
 type Pump struct {
-	Pin       uint
-	Flow      float32
-	PrimeTime float32
+	Pin             uint
+	FlowLPM         float64
+	PrimeTimeMillis int
 }

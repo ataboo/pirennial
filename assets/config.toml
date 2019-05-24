@@ -1,12 +1,12 @@
 [[pumps]]
 pin = 4
-flow = 2.0
-primeTime = 0.5
+flowLPM = 2
+primeTimeMillis = 500
 
 [[pumps]]
 pin = 22
-flow = 2.0
-primeTime = 0.5
+flowLPM = 2
+primeTimeMillis = 500
 
 # [[pumps]]
 # pin = 6
