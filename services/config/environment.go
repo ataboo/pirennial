@@ -1,6 +1,7 @@
 package config
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -14,26 +15,34 @@ func init() {
 }
 
 // AssetPath get the local path to an asset
-func AssetPath(path string) string {
+func AssetPath(path string) (string, error) {
 	if os.Getenv("ASSET_PATH") != "" {
-		return os.Getenv("ASSET_PATH") + "/" + path
+		return os.Getenv("ASSET_PATH") + "/" + path, nil
 	}
 
-	return findAssetPath() + "assets/" + path
+	assets, err := findAssetPath()
+	if err != nil {
+		return "", err
+	}
+
+	return assets + "assets/" + path, nil
 }
 
 // findAssetPath keep stepping to parent directory until `assets` dir is present
-func findAssetPath() string {
+func findAssetPath() (string, error) {
 	path := "./"
+	tries := 10
 
 	for {
-		if abs, _ := filepath.Abs(path); abs == "/" || fileExists(path+"ataboo") {
-			logger.Error("failed to find app root")
-			return ""
+		if abs, _ := filepath.Abs(path); abs == "/" || fileExists(path+"ataboo") || tries == 0 {
+			err := fmt.Errorf("failed to find assets directory")
+			logger.Error(err)
+			return "", err
 		}
+		tries--
 
 		if fileExists(path + "assets") {
-			return path
+			return path, nil
 		}
 
 		path = "../" + path

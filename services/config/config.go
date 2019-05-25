@@ -2,45 +2,61 @@ package config
 
 import (
 	"io/ioutil"
+	"log"
 
 	"github.com/op/go-logging"
 
 	"github.com/pelletier/go-toml"
 )
 
-var cfg Config
+var loadedCfg Config
 var logger *logging.Logger
 
 func init() {
 	logger = logging.MustGetLogger("pirennial")
-	cfg = loadConfig()
+	c, err := loadConfig()
+	if err != nil {
+		log.Fatal("failed to load config: " + err.Error())
+	}
+
+	loadedCfg = c
 }
 
+// Cfg get the app's loaded config
 func Cfg() *Config {
-	return &cfg
+	return &loadedCfg
 }
 
-func loadConfig() Config {
+// Config for the app
+type Config struct {
+	Pumps []Pump
+}
+
+// Pump config for a pump
+type Pump struct {
+	Pin             uint
+	FlowLPM         float64
+	PrimeTimeMillis int
+}
+
+func loadConfig() (Config, error) {
 	cfg := Config{}
-	buff, err := ioutil.ReadFile(AssetPath("config.toml"))
+	cfgPath, err := AssetPath("config.toml")
+	if err != nil {
+		return cfg, err
+	}
+
+	buff, err := ioutil.ReadFile(cfgPath)
 	if err != nil {
 		logger.Errorf("failed to load config: ", err.Error())
+		return cfg, err
 	}
 
 	err = toml.Unmarshal(buff, &cfg)
 	if err != nil {
 		logger.Errorf("failed to unmarshal config: ", err.Error())
+		return cfg, err
 	}
 
-	return cfg
-}
-
-type Config struct {
-	Pumps []Pump
-}
-
-type Pump struct {
-	Pin             uint
-	FlowLPM         float64
-	PrimeTimeMillis int
+	return cfg, nil
 }
