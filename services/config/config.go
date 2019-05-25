@@ -44,6 +44,7 @@ type Serial struct {
 	PortName          string
 	BaudRate          uint
 	RetryDelaySeconds uint
+	BufferSize        uint
 }
 
 func loadConfig() (Config, error) {

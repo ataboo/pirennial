@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"strings"
+	"time"
 
 	"github.com/ataboo/pirennial/services/config"
 	"github.com/jacobsa/go-serial/serial"
@@ -20,15 +22,17 @@ func init() {
 func ReadSerial() (SerialReturn, error) {
 	out := SerialReturn{}
 	var err error
+	cfg := config.Cfg().Serial
 
 	if serialRead == nil {
-		serialRead, err = connect(config.Cfg().Serial)
+		serialRead, err = connect(cfg)
 		if err != nil {
 			return out, fmt.Errorf("failed to connect to serial: %s", err.Error())
 		}
 	}
 
-	buf := make([]byte, 100000)
+	buf := make([]byte, cfg.BufferSize)
+	serialRead.Write([]byte("1"))
 	_, err = serialRead.Read(buf)
 	if err != nil {
 		serialRead.Close()
@@ -36,9 +40,18 @@ func ReadSerial() (SerialReturn, error) {
 		return out, fmt.Errorf("failed to read from serial: %s", err)
 	}
 
-	json.Unmarshal(buf, &out)
+	buf = []byte(strings.Trim(string(buf), "\r\n\x00"))
 
-	return out, nil
+	json.Unmarshal(buf, &out.Sensors)
+	out.LastRead = time.Now()
+
+	if len(out.Sensors) == 0 {
+		err = fmt.Errorf("no sensor data in received")
+	} else {
+		err = nil
+	}
+
+	return out, err
 }
 
 func Cleanup() {

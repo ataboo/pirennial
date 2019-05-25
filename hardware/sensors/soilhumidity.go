@@ -8,5 +8,6 @@ type SerialReturn struct {
 }
 
 type SoilHumidity struct {
-	Raw uint16
+	Pin   uint `json:"pin"`
+	Value uint `json:"value"`
 }

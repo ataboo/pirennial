@@ -1,8 +1,9 @@
 package main
 
 import (
-	"github.com/ataboo/pirennial/hardware/pumps"
-	"github.com/ataboo/pirennial/services/config"
+	"time"
+
+	"github.com/ataboo/pirennial/hardware/sensors"
 	"github.com/op/go-logging"
 )
 
@@ -13,5 +14,18 @@ func init() {
 }
 
 func main() {
-	pumps.CreatePumpControl(*config.Cfg())
+	// pumps.CreatePumpControl(*config.Cfg())
+
+	tick := time.Tick(time.Millisecond * 500)
+	for {
+		select {
+		case <-tick:
+			ret, err := sensors.ReadSerial()
+			if err != nil {
+				logger.Error(err)
+			} else {
+				logger.Infof("Return: %+v", ret)
+			}
+		}
+	}
 }
