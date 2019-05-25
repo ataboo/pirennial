@@ -2,33 +2,26 @@ package config
 
 import (
 	"io/ioutil"
-	"log"
 
 	"github.com/op/go-logging"
 
 	"github.com/pelletier/go-toml"
 )
 
-var loadedCfg Config
 var logger *logging.Logger
 
 func init() {
 	logger = logging.MustGetLogger("pirennial")
-	c, err := loadConfig()
-	if err != nil {
-		log.Fatal("failed to load config: " + err.Error())
-	}
+	// c, err := loadConfig()
+	// if err != nil {
+	// 	log.Fatal("failed to load config: " + err.Error())
+	// }
 
-	loadedCfg = c
+	// loadedCfg = c
 }
 
-// Cfg get the app's loaded config
-func Cfg() *Config {
-	return &loadedCfg
-}
-
-// Config for the app
-type Config struct {
+// HardwareConfig configuration for the hardware
+type HardwareConfig struct {
 	Pumps  []Pump
 	Serial Serial
 }
@@ -47,24 +40,31 @@ type Serial struct {
 	BufferSize        uint
 }
 
-func loadConfig() (Config, error) {
-	cfg := Config{}
-	cfgPath, err := AssetPath("config.toml")
+func LoadHardwareConfig() (HardwareConfig, error) {
+	cfg := HardwareConfig{}
+
+	err := LoadTOMLFile("hardware_config.toml", &cfg)
+
+	return cfg, err
+}
+
+func LoadTOMLFile(assetPath string, output interface{}) error {
+	cfgPath, err := AssetPath(assetPath)
 	if err != nil {
-		return cfg, err
+		return err
 	}
 
 	buff, err := ioutil.ReadFile(cfgPath)
 	if err != nil {
 		logger.Errorf("failed to load config: ", err.Error())
-		return cfg, err
+		return err
 	}
 
-	err = toml.Unmarshal(buff, &cfg)
+	err = toml.Unmarshal(buff, output)
 	if err != nil {
 		logger.Errorf("failed to unmarshal config: ", err.Error())
-		return cfg, err
+		return err
 	}
 
-	return cfg, nil
+	return nil
 }
