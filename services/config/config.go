@@ -29,7 +29,8 @@ func Cfg() *Config {
 
 // Config for the app
 type Config struct {
-	Pumps []Pump
+	Pumps  []Pump
+	Serial Serial
 }
 
 // Pump config for a pump
@@ -37,6 +38,12 @@ type Pump struct {
 	Pin             uint
 	FlowLPM         float64
 	PrimeTimeMillis int
+}
+
+type Serial struct {
+	PortName          string
+	BaudRate          uint
+	RetryDelaySeconds uint
 }
 
 func loadConfig() (Config, error) {

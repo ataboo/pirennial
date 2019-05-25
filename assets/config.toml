@@ -8,6 +8,10 @@ pin = 22
 flowLPM = 2
 primeTimeMillis = 500
 
+[serial]
+comPort = "/dev/ttyACM0"
+baudRate = 57600
+
 # [[pumps]]
 # pin = 6
 # flow = 2.0

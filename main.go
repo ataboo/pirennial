@@ -13,6 +13,5 @@ func init() {
 }
 
 func main() {
-	ps := pumps.CreatePumpControl(*config.Cfg())
-
+	pumps.CreatePumpControl(*config.Cfg())
 }
