@@ -1,21 +1,19 @@
-package config
+package filestorage
 
 import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"runtime"
+
+	"github.com/op/go-logging"
 )
 
-// GPIOActive if the arch is arm (pi)
-var GPIOActive bool
-
-func init() {
-	GPIOActive = runtime.GOARCH == "arm"
-}
+var logger *logging.Logger
 
 // AssetPath get the local path to an asset
 func AssetPath(path string) (string, error) {
+	logger = logging.MustGetLogger("pirennial")
+
 	if os.Getenv("ASSET_PATH") != "" {
 		return os.Getenv("ASSET_PATH") + "/" + path, nil
 	}
@@ -34,7 +32,7 @@ func findAssetPath() (string, error) {
 	tries := 10
 
 	for {
-		if abs, _ := filepath.Abs(path); abs == "/" || fileExists(path+"ataboo") || tries == 0 {
+		if abs, _ := filepath.Abs(path); abs == "/" || fileExists(path+"pirennial") || tries == 0 {
 			err := fmt.Errorf("failed to find assets directory")
 			logger.Error(err)
 			return "", err
