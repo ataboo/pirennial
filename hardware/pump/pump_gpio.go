@@ -5,8 +5,9 @@ import (
 	"sync"
 	"time"
 
+	"github.com/ataboo/pirennial/environment/clock"
+	"github.com/ataboo/pirennial/environment/config"
 	"github.com/ataboo/pirennial/hardware/relay"
-	"github.com/ataboo/pirennial/services/clock"
 )
 
 // Pump provides water to plant
@@ -18,6 +19,30 @@ type PumpGPIO struct {
 	sprinkles       SprinkleLog
 	lock            sync.Mutex
 	stopChan        chan int
+}
+
+func CreatePumpGPIO(cfg config.Pump) Pump {
+	pump := PumpGPIO{
+		relay:           relay.CreateRelayGPIO(cfg.Pin),
+		flowLPM:         cfg.FlowLPM,
+		primeTimeMillis: cfg.PrimeTimeMillis,
+		sprinkles:       SprinkleLog{},
+		stopChan:        nil,
+	}
+
+	return &pump
+}
+
+func CreatePumpMock(cfg config.Pump) Pump {
+	pump := PumpGPIO{
+		relay:           relay.CreateRelayMock(cfg.Pin),
+		flowLPM:         cfg.FlowLPM,
+		primeTimeMillis: cfg.PrimeTimeMillis,
+		sprinkles:       SprinkleLog{},
+		stopChan:        nil,
+	}
+
+	return &pump
 }
 
 // IsOn determine if the pump is currently running

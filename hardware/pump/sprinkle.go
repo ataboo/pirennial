@@ -5,7 +5,7 @@ package pump
 import (
 	"time"
 
-	"github.com/ataboo/pirennial/services/clock"
+	"github.com/ataboo/pirennial/environment/clock"
 )
 
 // Sprinkle representation of a watering event performed by a pump

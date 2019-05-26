@@ -2,8 +2,12 @@ package config
 
 // HardwareConfig configuration for the hardware
 type HardwareConfig struct {
-	Pumps  []Pump
+	GPIO   GPIO
 	Serial Serial
+}
+
+type GPIO struct {
+	Pumps []Pump
 }
 
 // Pump config for a pump
@@ -18,6 +22,12 @@ type Serial struct {
 	BaudRate          uint
 	RetryDelaySeconds uint
 	BufferSize        uint
+	SoilSensors       []SoilSensor
+}
+
+type SoilSensor struct {
+	InputPin uint
+	PowerPin uint
 }
 
 func LoadHardwareConfig() (HardwareConfig, error) {

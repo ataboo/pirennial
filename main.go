@@ -3,7 +3,6 @@ package main
 import (
 	"time"
 
-	"github.com/ataboo/pirennial/hardware/sensors"
 	"github.com/op/go-logging"
 )
 
