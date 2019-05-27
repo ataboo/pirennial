@@ -27,7 +27,6 @@ type Serial struct {
 
 type SoilSensor struct {
 	InputPin uint
-	PowerPin uint
 }
 
 func LoadHardwareConfig() (HardwareConfig, error) {
