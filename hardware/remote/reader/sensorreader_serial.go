@@ -1,19 +1,17 @@
 package reader
 
 import (
+	"encoding/json"
 	"fmt"
-	"io"
-	"strings"
 
 	"github.com/ataboo/pirennial/environment/config"
 	"github.com/ataboo/pirennial/hardware/remote/connection"
 	"github.com/ataboo/pirennial/hardware/remote/sensor"
-	"github.com/jacobsa/go-serial/serial"
 	"github.com/op/go-logging"
 )
 
 const (
-	GET = 0x2
+	GET   = 0x2
 	SLEEP = 0x3
 )
 
@@ -21,24 +19,15 @@ var logger logging.Logger
 
 type SensorReaderSerial struct {
 	cfg        config.Serial
-	connection io.ReadWriteCloser
-	buffer []byte
+	connection connection.Connection
+	buffer     []byte
 }
 
-func CreateSensorReaderArduino(cfg config.Serial) SensorReader {
+func CreateSensorReaderSerial(cfg config.Serial, conn connection.Connection) SensorReader {
 	r := SensorReaderSerial{
 		cfg:        cfg,
-		connection: connection.CreateSensorReaderArduino(cfg),
-		buffer: make([]byte, cfg.BufferSize)
-	}
-
-	return &r
-}
-
-func CreateSensorReaderMock(cfg config.Serial) SensorReader {
-	r := SensorReaderSerial {
-		cfg config.Serial,
-		connection: connection.CreateSensorReaderMock(cfg),
+		connection: conn,
+		buffer:     make([]byte, cfg.BufferSize),
 	}
 
 	return &r
@@ -57,8 +46,9 @@ func (r *SensorReaderSerial) Update(sensors []sensor.Sensor) error {
 		if !ok {
 			hadErr = true
 			logger.Errorf("Failed to get pin %d from serial return", sensor.Data().InputPin)
+		} else {
+			sensor.Data().Value = val
 		}
-		sensor.Data().Value = val
 	}
 
 	if hadErr {
@@ -76,20 +66,20 @@ func (r *SensorReaderSerial) Cleanup() {
 }
 
 func (r *SensorReaderSerial) Sleep() (err error) {
-	n, err := r.connection.Write([]byte{SLEEP})
+	_, err = r.connection.Write([]byte{SLEEP})
 
 	return err
 }
 
-func (r *SensorReaderSerial) getSensorData() (out map[uint]int, err error) {	
-	_, err := r.connection.Write([]byte{GET})
-	
+func (r *SensorReaderSerial) getSensorData() (out map[uint]int, err error) {
+	_, err = r.connection.Write([]byte{GET})
+
 	n, err := r.connection.Read(r.buffer)
 	if err != nil {
 		return out, err
 	}
 
-	trimmed := buf[0:n]
+	trimmed := r.buffer[0:n]
 	err = json.Unmarshal(trimmed, &out)
 	return out, err
 }
