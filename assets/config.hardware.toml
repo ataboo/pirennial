@@ -1,0 +1,23 @@
+[gpio]
+    [[gpio.pumps]]
+    pin = 4
+    flowLPM = 2
+    primeTimeMillis = 500
+
+    [[gpio.pumps]]
+    pin = 22
+    flowLPM = 2
+    primeTimeMillis = 500
+
+[serial]
+portName = "/dev/ttyUSB1"
+baudRate = 9600
+bufferSize = 1000
+
+    [[serial.soilsensors]]
+    inputPin = 1
+    powerPin = 2
+    [[serial.soilsensors]]
+    inputPin = 3
+    powerPin = 4
+

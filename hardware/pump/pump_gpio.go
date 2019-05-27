@@ -1,17 +1,18 @@
-package pumps
+package pump
 
 import (
 	"fmt"
 	"sync"
 	"time"
 
-	"github.com/ataboo/pirennial/services/clock"
-	"github.com/ataboo/pirennial/services/config"
+	"github.com/ataboo/pirennial/environment/clock"
+	"github.com/ataboo/pirennial/environment/config"
+	"github.com/ataboo/pirennial/hardware/relay"
 )
 
 // Pump provides water to plant
-type Pump struct {
-	relay           *Relay
+type PumpGPIO struct {
+	relay           relay.Relay
 	runStart        time.Time
 	flowLPM         float64
 	primeTimeMillis int
@@ -20,24 +21,37 @@ type Pump struct {
 	stopChan        chan int
 }
 
-// NewPump create a new pump
-func NewPump(pumpCfg config.Pump) *Pump {
-	pump := Pump{
-		relay:           NewRelay(pumpCfg.Pin),
-		flowLPM:         pumpCfg.FlowLPM,
-		primeTimeMillis: pumpCfg.PrimeTimeMillis,
+func CreatePumpGPIO(cfg config.Pump) Pump {
+	pump := PumpGPIO{
+		relay:           relay.CreateRelayGPIO(cfg.Pin),
+		flowLPM:         cfg.FlowLPM,
+		primeTimeMillis: cfg.PrimeTimeMillis,
+		sprinkles:       SprinkleLog{},
+		stopChan:        nil,
+	}
+
+	return &pump
+}
+
+func CreatePumpMock(cfg config.Pump) Pump {
+	pump := PumpGPIO{
+		relay:           relay.CreateRelayMock(cfg.Pin),
+		flowLPM:         cfg.FlowLPM,
+		primeTimeMillis: cfg.PrimeTimeMillis,
+		sprinkles:       SprinkleLog{},
+		stopChan:        nil,
 	}
 
 	return &pump
 }
 
 // IsOn determine if the pump is currently running
-func (p *Pump) IsOn() bool {
+func (p *PumpGPIO) IsOn() bool {
 	return p.relay.IsOn()
 }
 
 // Sprinkle pump a number of liters
-func (p *Pump) Sprinkle(liters float64) error {
+func (p *PumpGPIO) Sprinkle(liters float64) error {
 	duration := p.timeToPumpVolume(liters)
 	if err := p.pumpForTime(duration); err != nil {
 		return err
@@ -48,7 +62,7 @@ func (p *Pump) Sprinkle(liters float64) error {
 }
 
 // Stop pumping
-func (p *Pump) Stop() error {
+func (p *PumpGPIO) Stop() error {
 	p.lock.Lock()
 	defer p.lock.Unlock()
 
@@ -63,11 +77,11 @@ func (p *Pump) Stop() error {
 }
 
 // Cleanup the relay pin
-func (p *Pump) Cleanup() {
+func (p *PumpGPIO) Cleanup() {
 	p.relay.Cleanup()
 }
 
-func (p *Pump) pumpForTime(duration time.Duration) error {
+func (p *PumpGPIO) pumpForTime(duration time.Duration) error {
 	if p.IsOn() {
 		return fmt.Errorf("pump on pin %d is already running", p.relay.PinNumber())
 	}
@@ -83,7 +97,6 @@ func (p *Pump) pumpForTime(duration time.Duration) error {
 		for {
 			select {
 			case <-p.stopChan:
-				logger.Debugf("pump (%d) stopped by stopChan", p.relay.PinNumber())
 				return
 			case <-done:
 				p.cancelStop()
@@ -95,13 +108,13 @@ func (p *Pump) pumpForTime(duration time.Duration) error {
 	return nil
 }
 
-func (p *Pump) timeToPumpVolume(liters float64) time.Duration {
+func (p *PumpGPIO) timeToPumpVolume(liters float64) time.Duration {
 	seconds := float32(liters/p.flowLPM) * 60.0
 
 	return time.Duration(seconds*float32(time.Second)) + time.Duration(p.primeTimeMillis)*time.Millisecond
 }
 
-func (p *Pump) initStop() error {
+func (p *PumpGPIO) initStop() error {
 	defer p.lock.Unlock()
 	p.lock.Lock()
 
@@ -114,7 +127,7 @@ func (p *Pump) initStop() error {
 	return nil
 }
 
-func (p *Pump) cancelStop() error {
+func (p *PumpGPIO) cancelStop() error {
 	defer p.lock.Unlock()
 	p.lock.Lock()
 

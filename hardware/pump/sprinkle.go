@@ -1,9 +1,11 @@
-package pumps
+package pump
+
+// TODO: this should end up in a higher business logic layer with an interface for the pump model
 
 import (
 	"time"
 
-	"github.com/ataboo/pirennial/services/clock"
+	"github.com/ataboo/pirennial/environment/clock"
 )
 
 // Sprinkle representation of a watering event performed by a pump
