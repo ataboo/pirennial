@@ -4,7 +4,7 @@ import (
 	"log"
 
 	"github.com/ataboo/pirennial/environment/config"
-	"github.com/ataboo/pirennial/hardware/pump"
+	"github.com/ataboo/pirennial/hardware/water"
 	"github.com/ataboo/pirennial/hardware/sensors"
 	"github.com/op/go-logging"
 )
@@ -25,7 +25,7 @@ func main() {
 		log.Fatal("failed to connect to sensor service", err)
 	}
 
-	pumps := pump.CreatePumpService(hardwareCfg)
+	pumps := water.CreatePumpService(hardwareCfg)
 
 	defer func() {
 		sensors.Cleanup()

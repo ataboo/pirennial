@@ -10,10 +10,12 @@ import (
 
 var logger *logging.Logger
 
+func init() {
+	logger = logging.MustGetLogger("pirennial")
+}
+
 // AssetPath get the local path to an asset
 func AssetPath(path string) (string, error) {
-	logger = logging.MustGetLogger("pirennial")
-
 	if os.Getenv("ASSET_PATH") != "" {
 		return os.Getenv("ASSET_PATH") + "/" + path, nil
 	}
@@ -32,7 +34,7 @@ func FindAssetPath() (string, error) {
 	tries := 10
 
 	for {
-		if abs, _ := filepath.Abs(path); abs == "/" || FileExists(path+"pirennial") || tries == 0 {
+		if abs, _ := filepath.Abs(path); abs == "/" || tries == 0 {
 			err := fmt.Errorf("failed to find assets directory")
 			logger.Error(err)
 			return "", err
@@ -47,6 +49,7 @@ func FindAssetPath() (string, error) {
 	}
 }
 
+// FileExists determine if a path exists
 func FileExists(path string) bool {
 	_, err := os.Stat(path)
 

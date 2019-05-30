@@ -1,4 +1,4 @@
-package pump
+package relay
 
 type Relay interface {
 	IsOn() bool
