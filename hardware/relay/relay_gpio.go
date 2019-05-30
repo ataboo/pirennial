@@ -47,7 +47,7 @@ func (r *RelayGPIO) setOn(on bool) error {
 	r.isOn = on
 
 	if r.pin == nil {
-		return fmt.Errorf("pin on relay %d not innitialized")
+		return fmt.Errorf("pin on relay %d not innitialized", r.PinNumber())
 	}
 
 	if on {
