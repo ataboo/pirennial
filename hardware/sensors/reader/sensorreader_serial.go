@@ -5,8 +5,8 @@ import (
 	"fmt"
 
 	"github.com/ataboo/pirennial/environment/config"
-	"github.com/ataboo/pirennial/hardware/remote/connection"
-	"github.com/ataboo/pirennial/hardware/remote/sensor"
+	"github.com/ataboo/pirennial/hardware/sensors/connection"
+	"github.com/ataboo/pirennial/hardware/sensors/sensor"
 	"github.com/op/go-logging"
 )
 

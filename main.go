@@ -1,8 +1,11 @@
 package main
 
 import (
-	"time"
+	"log"
 
+	"github.com/ataboo/pirennial/environment/config"
+	"github.com/ataboo/pirennial/hardware/pump"
+	"github.com/ataboo/pirennial/hardware/sensors"
 	"github.com/op/go-logging"
 )
 
@@ -13,18 +16,20 @@ func init() {
 }
 
 func main() {
-	// pumps.CreatePumpControl(*config.Cfg())
-
-	tick := time.Tick(time.Millisecond * 500)
-	for {
-		select {
-		case <-tick:
-			ret, err := sensors.ReadSerial()
-			if err != nil {
-				logger.Error(err)
-			} else {
-				logger.Infof("Return: %+v", ret)
-			}
-		}
+	hardwareCfg, err := config.LoadHardwareConfig()
+	if err != nil {
+		log.Fatal("failed to load config", err)
 	}
+	sensors, err := sensors.CreateSensorService(hardwareCfg)
+	if err != nil {
+		log.Fatal("failed to connect to sensor service", err)
+	}
+
+	pumps := pump.CreatePumpService(hardwareCfg)
+
+	defer func() {
+		sensors.Cleanup()
+		pumps.Cleanup()
+	}()
+
 }

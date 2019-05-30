@@ -1,4 +1,4 @@
-package relay
+package pump
 
 type RelayMock struct {
 	isOn      bool

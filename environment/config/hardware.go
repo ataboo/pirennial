@@ -12,21 +12,18 @@ type GPIO struct {
 
 // Pump config for a pump
 type Pump struct {
-	Pin             uint
+	RelayPin        uint
+	SensorPin       uint
 	FlowLPM         float64
 	PrimeTimeMillis int
 }
 
 type Serial struct {
-	PortName          string
-	BaudRate          uint
-	RetryDelaySeconds uint
-	BufferSize        uint
-	SoilSensors       []SoilSensor
-}
-
-type SoilSensor struct {
-	InputPin uint
+	PortName           string
+	BaudRate           uint
+	RetryDelaySeconds  uint
+	BufferSize         uint
+	SensorUpdateMillis uint
 }
 
 func LoadHardwareConfig() (HardwareConfig, error) {

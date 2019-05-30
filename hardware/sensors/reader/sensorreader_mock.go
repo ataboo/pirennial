@@ -2,7 +2,7 @@ package reader
 
 import (
 	"github.com/ataboo/pirennial/environment/config"
-	"github.com/ataboo/pirennial/hardware/remote/sensor"
+	"github.com/ataboo/pirennial/hardware/sensors/sensor"
 )
 
 type SensorReaderMock struct {
@@ -29,4 +29,8 @@ func (r *SensorReaderMock) Update(sensors []sensor.Sensor) error {
 
 func (r *SensorReaderMock) Cleanup() {
 	//
+}
+
+func (r *SensorReaderMock) Sleep() error {
+	return nil
 }

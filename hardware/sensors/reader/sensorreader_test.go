@@ -3,26 +3,23 @@ package reader
 import (
 	"testing"
 
-	"github.com/ataboo/pirennial/hardware/remote/sensor"
+	"github.com/ataboo/pirennial/hardware/sensors/sensor"
 
 	"github.com/ataboo/pirennial/environment/config"
-	"github.com/ataboo/pirennial/hardware/remote/connection"
+	"github.com/ataboo/pirennial/hardware/sensors/connection"
 )
 
 func TestSensorReaderUnmarshaling(t *testing.T) {
 	table := []struct {
 		rawJson string
 		valid   bool
-		cfgs    []config.SoilSensor
+		inputPins    []uint
 		values  []int
 	}{
 		{
 			rawJson: `{"0":1, "2":3}`,
 			valid:   true,
-			cfgs: []config.SoilSensor{
-				{InputPin: 0},
-				{InputPin: 2},
-			},
+			inputPins: []uint{0, 2},
 			values: []int{1, 3},
 		},
 		// Not parsable
@@ -34,33 +31,29 @@ func TestSensorReaderUnmarshaling(t *testing.T) {
 		{
 			rawJson: `{"0":1, "5":3}`,
 			valid:   false,
-			cfgs: []config.SoilSensor{
-				{InputPin: 0},
-				{InputPin: 2},
-			},
+			inputPins: []uint{0, 2},
 		},
 	}
 
 	mockConn := connection.CreateConnectionMock()
-	cfg := config.Serial{
+	serialCfg := config.Serial{
 		BufferSize: 1000,
 	}
 
-	CreateSensorReaderSerial(cfg, mockConn)
+	CreateSensorReaderSerial(serialCfg, mockConn)
 	reader := SensorReaderSerial{
-		cfg:        cfg,
+		cfg:        serialCfg,
 		connection: mockConn,
-		buffer:     make([]byte, cfg.BufferSize),
+		buffer:     make([]byte, serialCfg.BufferSize),
 	}
 	var sensors []sensor.Sensor
 
 	for _, row := range table {
 		mockConn.GetResponse = []byte(row.rawJson)
-		cfg.SoilSensors = row.cfgs
-		sensors = make([]sensor.Sensor, len(cfg.SoilSensors))
+		sensors = make([]sensor.Sensor, len(row.inputPins))
 
-		for i, sensorCfg := range cfg.SoilSensors {
-			sensors[i] = sensor.CreateSoilSensorSerial(sensorCfg)
+		for i, inputPin := range row.inputPins {
+			sensors[i] = sensor.CreateSoilSensorSerial(inputPin)
 			sensors[i].Data().Value = -1
 		}
 

@@ -1,15 +1,13 @@
 package sensor
 
-import "github.com/ataboo/pirennial/environment/config"
-
 type SoilSensor struct {
 	data SensorData
 }
 
-func CreateSoilSensorSerial(cfg config.SoilSensor) Sensor {
+func CreateSoilSensorSerial(pin uint) Sensor {
 	s := SoilSensor{
 		data: SensorData{
-			InputPin: cfg.InputPin,
+			InputPin: pin,
 			Value:    0,
 		},
 	}

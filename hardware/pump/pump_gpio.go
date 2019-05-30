@@ -7,12 +7,11 @@ import (
 
 	"github.com/ataboo/pirennial/environment/clock"
 	"github.com/ataboo/pirennial/environment/config"
-	"github.com/ataboo/pirennial/hardware/relay"
 )
 
 // Pump provides water to plant
 type PumpGPIO struct {
-	relay           relay.Relay
+	relay           Relay
 	runStart        time.Time
 	flowLPM         float64
 	primeTimeMillis int
@@ -23,7 +22,7 @@ type PumpGPIO struct {
 
 func CreatePumpGPIO(cfg config.Pump) Pump {
 	pump := PumpGPIO{
-		relay:           relay.CreateRelayGPIO(cfg.Pin),
+		relay:           CreateRelayGPIO(cfg.RelayPin),
 		flowLPM:         cfg.FlowLPM,
 		primeTimeMillis: cfg.PrimeTimeMillis,
 		sprinkles:       SprinkleLog{},
@@ -35,7 +34,7 @@ func CreatePumpGPIO(cfg config.Pump) Pump {
 
 func CreatePumpMock(cfg config.Pump) Pump {
 	pump := PumpGPIO{
-		relay:           relay.CreateRelayMock(cfg.Pin),
+		relay:           CreateRelayMock(cfg.RelayPin),
 		flowLPM:         cfg.FlowLPM,
 		primeTimeMillis: cfg.PrimeTimeMillis,
 		sprinkles:       SprinkleLog{},
