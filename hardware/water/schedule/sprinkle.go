@@ -1,8 +1,9 @@
-package pump
+package schedule
 
 // TODO: this should end up in a higher business logic layer with an interface for the pump model
 
 import (
+	"sort"
 	"time"
 
 	"github.com/ataboo/pirennial/environment/clock"
@@ -39,7 +40,7 @@ func (l *SprinkleLog) GCBeforeDurationAgo(duration time.Duration) {
 
 	for i := len(*l); i >= 0; i-- {
 		if (*l)[i].startTime.Before(cutoff) {
-			l.PopBack()
+			l.popBack()
 		} else {
 			break
 		}
@@ -47,22 +48,28 @@ func (l *SprinkleLog) GCBeforeDurationAgo(duration time.Duration) {
 }
 
 // AddLog add a sprinkle amount to the log
-func (l *SprinkleLog) AddLog(volume float64) {
+func (l *SprinkleLog) LogPumpVolume(volume float64) {
 	s := Sprinkle{
 		startTime: clock.Now(),
 		volume:    volume,
 	}
 
-	l.Push(s)
+	l.push(s)
+}
+
+func (l *SprinkleLog) Sort() {
+	sort.Slice(*l, func(i, j int) bool {
+		return (*l)[i].startTime.Before((*l)[j].startTime)
+	})
 }
 
 // Push a Sprinkle to the front of the log
-func (l *SprinkleLog) Push(s Sprinkle) {
+func (l *SprinkleLog) push(s Sprinkle) {
 	*l = append(*l, s)
 }
 
-// PopBack pop a Sprinkle off the back of the log
-func (l *SprinkleLog) PopBack() *Sprinkle {
+// popBack pop a Sprinkle off the back of the log
+func (l *SprinkleLog) popBack() *Sprinkle {
 	back := (*l)[len(*l)-1]
 	*l = (*l)[0 : len(*l)-1]
 
