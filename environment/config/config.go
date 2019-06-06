@@ -12,7 +12,7 @@ import (
 
 var logger *logging.Logger
 
-// GPIOActive if the arch is arm (pi)
+// GPIOActive if the arch is arm, assumes pi with GPIO
 var GPIOActive bool
 
 func init() {
@@ -20,6 +20,7 @@ func init() {
 	GPIOActive = runtime.GOARCH == "arm"
 }
 
+// LoadTOMLFile load and parse a TOML file relative to the assets directory
 func LoadTOMLFile(assetPath string, output interface{}) error {
 	cfgPath, err := filestorage.AssetPath(assetPath)
 	if err != nil {
@@ -32,11 +33,14 @@ func LoadTOMLFile(assetPath string, output interface{}) error {
 		return err
 	}
 
-	err = toml.Unmarshal(buff, output)
-	if err != nil {
+	if err := parseTOML(buff, output); err != nil {
 		logger.Errorf("failed to unmarshal config: ", err.Error())
 		return err
 	}
 
 	return nil
+}
+
+func parseTOML(readBuffer []byte, output interface{}) error {
+	return toml.Unmarshal(readBuffer, output)
 }

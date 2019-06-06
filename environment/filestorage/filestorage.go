@@ -20,7 +20,7 @@ func AssetPath(path string) (string, error) {
 		return os.Getenv("ASSET_PATH") + "/" + path, nil
 	}
 
-	assets, err := FindAssetPath()
+	assets, err := findAppRoot("")
 	if err != nil {
 		return "", err
 	}
@@ -28,10 +28,13 @@ func AssetPath(path string) (string, error) {
 	return assets + "assets/" + path, nil
 }
 
-// FindAssetPath keep stepping to parent directory until `assets` dir is present
-func FindAssetPath() (string, error) {
+func findAppRoot(startPath string) (string, error) {
+	// Start at the system's current directory and travel up until the app root is recognized or tries is exceeded.
 	path := "./"
 	tries := 10
+	if startPath != "" {
+		path = startPath
+	}
 
 	for {
 		if abs, _ := filepath.Abs(path); abs == "/" || tries == 0 {
@@ -41,7 +44,7 @@ func FindAssetPath() (string, error) {
 		}
 		tries--
 
-		if FileExists(path + "assets") {
+		if FileExists(path + "go.mod") {
 			return path, nil
 		}
 
