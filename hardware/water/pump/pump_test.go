@@ -7,10 +7,13 @@ import (
 
 	"github.com/ataboo/pirennial/environment/clock"
 	"github.com/ataboo/pirennial/environment/config"
+	"github.com/ataboo/pirennial/hardware/water/schedule"
 )
 
 func TestPumpForTimeAndStop(t *testing.T) {
-	p := CreatePumpMock(config.Pump{}).(*PumpGPIO)
+	pumpLogger := schedule.SprinkleLog{}
+
+	p := CreatePumpMock(config.Pump{}, &pumpLogger).(*PumpGPIO)
 
 	p.pumpForTime(time.Second)
 
@@ -49,10 +52,11 @@ func TestPumpForTimeAndStop(t *testing.T) {
 }
 
 func TestPumpForTimeWithoutStop(t *testing.T) {
+	pumpLogger := schedule.SprinkleLog{}
 	fakeClock := clock.CreateFakeClock()
 	clock.SetClock(fakeClock)
 	afterChan := fakeClock.AfterChan
-	p := CreatePumpMock(config.Pump{}).(*PumpGPIO)
+	p := CreatePumpMock(config.Pump{}, &pumpLogger).(*PumpGPIO)
 
 	err := p.pumpForTime(time.Second)
 	if err != nil {
@@ -109,11 +113,12 @@ func TestTimeToPumpVolume(t *testing.T) {
 	}
 
 	var p *PumpGPIO
+	pumpLogger := schedule.SprinkleLog{}
 
 	for _, row := range rows {
 		cfg.PrimeTimeMillis = row.primeTimeMillis
 		cfg.FlowLPM = row.flowLPM
-		p = CreatePumpMock(cfg).(*PumpGPIO)
+		p = CreatePumpMock(cfg, &pumpLogger).(*PumpGPIO)
 
 		duration := p.timeToPumpVolume(row.liters)
 
@@ -141,7 +146,9 @@ func TestSprinkle(t *testing.T) {
 		FlowLPM:         2,
 	}
 
-	p := CreatePumpMock(cfg).(*PumpGPIO)
+	pumpLogger := schedule.SprinkleLog{}
+
+	p := CreatePumpMock(cfg, &pumpLogger).(*PumpGPIO)
 
 	p.Sprinkle(1)
 

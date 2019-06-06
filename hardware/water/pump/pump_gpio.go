@@ -16,31 +16,31 @@ type PumpGPIO struct {
 	runStart        time.Time
 	flowLPM         float64
 	primeTimeMillis int
-	sprinkles       SprinkleLog
 	lock            sync.Mutex
 	stopChan        chan int
+	pumpLogger      PumpLogger
 }
 
 // CreatePumpGPIO create a new PumpGPIO
-func CreatePumpGPIO(cfg config.Pump) Pump {
+func CreatePumpGPIO(cfg config.Pump, pumpLogger PumpLogger) Pump {
 	pump := PumpGPIO{
 		relay:           relay.CreateRelayGPIO(cfg.RelayPin),
 		flowLPM:         cfg.FlowLPM,
 		primeTimeMillis: cfg.PrimeTimeMillis,
-		sprinkles:       SprinkleLog{},
 		stopChan:        nil,
+		pumpLogger:      pumpLogger,
 	}
 
 	return &pump
 }
 
 // CreatePumpMock create a PumpGPIO using a mocked relay
-func CreatePumpMock(cfg config.Pump) Pump {
+func CreatePumpMock(cfg config.Pump, pumpLogger PumpLogger) Pump {
 	pump := PumpGPIO{
 		relay:           relay.CreateRelayMock(cfg.RelayPin),
 		flowLPM:         cfg.FlowLPM,
 		primeTimeMillis: cfg.PrimeTimeMillis,
-		sprinkles:       SprinkleLog{},
+		pumpLogger:      pumpLogger,
 		stopChan:        nil,
 	}
 
@@ -59,7 +59,7 @@ func (p *PumpGPIO) Sprinkle(liters float64) error {
 		return err
 	}
 
-	p.sprinkles.AddLog(liters)
+	p.pumpLogger.LogPumpVolume(liters)
 	return nil
 }
 

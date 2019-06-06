@@ -6,3 +6,7 @@ type Pump interface {
 	Cleanup()
 	IsOn() bool
 }
+
+type PumpLogger interface {
+	LogPumpVolume(liters float64)
+}
